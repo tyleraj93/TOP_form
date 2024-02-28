@@ -1,47 +1,147 @@
+import "./style.css";
+
 const form = document.querySelector("form");
 const email = document.getElementById("email");
-const emailError = document.querySelector("#email + span.error");
+const country = document.getElementById("country");
+const zipCode = document.getElementById("zip_code");
+const password = document.getElementById("password");
+const confirm_password = document.getElementById("confirm_password");
+const resetButton = document.getElementById("reset");
 
-email.addEventListener("input", (event) => {
-    // Each time the user types something, we check if the
-    // form fields are valid.
+const countryRegex = /^[a-zA-Z\s]+$/;
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const zipCodeRegex = /^\d{5}$/;
+const passwordRegex = /^[0-9a-zA-Z`~!@#$%^&*()\-_=+\[\]{}\\|;:'",.<>/?]{8,}$/;
 
-    if (email.validity.valid) {
-        // In case there is an error message visible, if the field
-        // is valid, we remove the error message.
-        emailError.textContent = ""; // Reset the content of the message
-        emailError.className = "error"; // Reset the visual state of the message
+email.addEventListener("input", validateEmail);
+country.addEventListener("input", validateCountry);
+zipCode.addEventListener("input", validateZipCode);
+password.addEventListener("input", validatePassword);
+confirm_password.addEventListener("input", validateConfirmPassword);
+resetButton.addEventListener("click", resetStyle);
+resetButton.addEventListener("click", resetErrors);
+
+function validateEmail() {
+    const error = email.nextElementSibling;
+    if (email.value === "" || !emailRegex.test(email.value)) {
+        error.textContent = "Please enter a valid email address.";
+        error.style.color = "red";
+        email.classList.add("invalid");
+        email.classList.remove("valid", "empty");
+        return false;
     } else {
-        // If there is still an error, show the correct error
-        showError();
+        error.textContent = "";
+        email.classList.add("valid");
+        email.classList.remove("invalid");
+        return true;
     }
-});
-
-form.addEventListener("submit", (event) => {
-    // if the email field is valid, we let the form submit
-    if (!email.validity.valid) {
-        // If it isn't, we display an appropriate error message
-        showError();
-        // Then we prevent the form from being sent by canceling the event
-        event.preventDefault();
-    }
-});
-
-function showError() {
-    if (email.validity.valueMissing) {
-        // If the field is empty,
-        // display the following error message.
-        emailError.textContent = "You need to enter an email address.";
-    } else if (email.validity.typeMismatch) {
-        // If the field doesn't contain an email address,
-        // display the following error message.
-        emailError.textContent = "Entered value needs to be an email address.";
-    } else if (email.validity.tooShort) {
-        // If the data is too short,
-        // display the following error message.
-        emailError.textContent = `Email should be at least ${email.minLength} characters; you entered ${email.value.length}.`;
-    }
-
-    // Set the styling appropriately
-    emailError.className = "error active";
 }
+
+function validateCountry() {
+    const error = country.nextElementSibling;
+    if (country.value === "" || !countryRegex.test(country.value)) {
+        error.textContent = "Please enter a country.";
+        error.style.color = "red";
+        country.classList.add("invalid");
+        country.classList.remove("valid", "empty");
+        return false;
+    } else {
+        error.textContent = "";
+        country.classList.add("valid");
+        country.classList.remove("invalid");
+        return true;
+    }
+}
+
+function validateZipCode() {
+    const error = zipCode.nextElementSibling;
+    if (zipCode.value === "" || !zipCodeRegex.test(zipCode.value)) {
+        error.textContent = "Please enter a valid zip code.";
+        error.style.color = "red";
+        zipCode.classList.add("invalid");
+        zipCode.classList.remove("valid", "empty");
+        return false;
+    } else {
+        error.textContent = "";
+        zipCode.classList.add("valid");
+        zipCode.classList.remove("invalid");
+        return true;
+    }
+}
+
+function validatePassword() {
+    const error = password.nextElementSibling;
+    if (password.value === "" || !passwordRegex.test(password.value)) {
+        error.textContent = "Please enter a valid password.";
+        error.style.color = "red";
+        password.classList.add("invalid");
+        password.classList.remove("valid", "empty");
+        return false;
+    } else {
+        error.textContent = "";
+        password.classList.add("valid");
+        password.classList.remove("invalid");
+        return true;
+    }
+}
+
+function validateConfirmPassword() {
+    const error = confirm_password.nextElementSibling;
+    if (password.value !== confirm_password.value) {
+        error.textContent = "Passwords do not match.";
+        error.style.color = "red";
+        confirm_password.classList.add("invalid");
+        confirm_password.classList.remove("valid", "empty");
+        return false;
+    } else {
+        error.textContent = "Passwords Match";
+        error.style.color = "green";
+        confirm_password.classList.add("valid");
+        confirm_password.classList.remove("invalid");
+        return true;
+    }
+}
+
+function resetInputs() {
+    document.querySelectorAll("input").forEach(function (input) {
+        input.value = "";
+    });
+}
+
+function resetErrors() {
+    document.querySelectorAll(".error").forEach(function (span) {
+        span.textContent = "";
+    });
+}
+
+function resetStyle() {
+    document.querySelectorAll("input").forEach(function (input) {
+        input.classList.remove("valid", "invalid");
+        input.classList.add("empty");
+    });
+}
+
+function validateForm(event) {
+    event.preventDefault();
+    form.classList.add("attempted-submitted");
+    let isValid = true;
+
+    // Reset error messages
+    resetErrors();
+
+    if (!validateEmail()) isValid = false;
+    if (!validateCountry()) isValid = false;
+    if (!validateZipCode()) isValid = false;
+    if (!validatePassword()) isValid = false;
+    if (!validateConfirmPassword()) isValid = false;
+
+    if (isValid) {
+        resetInputs();
+        resetErrors();
+        alert("Form submitted successfully!");
+    } else {
+        alert("Form validation failed!");
+    }
+}
+
+form.addEventListener("submit", validateForm);
